@@ -13,11 +13,13 @@ openai_vision_client = OpenAI(
 )
 
 
-async def image_sense_qa(prompt: str, image_paths: List[str]):
+async def image_sense_qa(prompt: str, image_paths: List[str], compress: bool = True):
     """Identify image content and answer user questions."""
     content = [{"type": "text", "text": f"{prompt}"}]
     for image_path in image_paths:
-        image_path = format_image(image_path)
+        if compress:
+            image_path = format_image(image_path)
+        print(f'image_path: {image_path}')
         b64_img = convert_image_to_base64(image_path)
         image_message = {
             "type": "image_url",
@@ -46,4 +48,5 @@ if __name__ == '__main__':
     prompt = '准确识别图中全部文字内容'
     # prompt = 'Identify all text content in the image'
     image_paths = ["/Users/valdanito/Downloads/test222.jpg"]
-    asyncio.run(image_sense_qa(prompt, image_paths))
+    asyncio.run(image_sense_qa(prompt, image_paths, False))
+    asyncio.run(image_sense_qa(prompt, image_paths, True))
