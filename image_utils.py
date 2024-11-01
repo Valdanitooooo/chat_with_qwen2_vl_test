@@ -119,8 +119,9 @@ def format_image(
             warnings.warn(
                 f"Failed to transpose image {image_path} based on EXIF data."
             )
-    image_name = os.path.splitext(image_path)[0]
-    image_ext = os.path.splitext(image_path)[1].lstrip(".")
+    image_name_arr = os.path.basename(image_path).split(".")
+    image_name = image_name_arr[0]
+    image_ext = image_name_arr[1]
 
     if image_ext in ["jpg", "jpeg"]:
         image_ext = "jpeg"
