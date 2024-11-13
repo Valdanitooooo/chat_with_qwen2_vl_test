@@ -9,7 +9,6 @@ from pathlib import Path
 import requests
 from PIL import Image, ImageSequence, PngImagePlugin, ImageOps
 
-
 # Modified from: https://github.com/gradio-app/gradio/blob/main/gradio/processing_utils.py
 
 CACHE_DIR = '/tmp'
@@ -90,9 +89,29 @@ def save_pil_to_cache(
     return filename
 
 
+# 对分辨率较大的图片进行压缩，提升识别效果
+# 仅对部分图片有效，对那种图片很大，但是要识别的内容在图片中占比很小的情况会起负面效果
+def resize_image(input_image):
+    width, height = input_image.size
+    max_size = 500
+
+    if width > max_size or height > max_size:
+        if width > height:
+            new_width = max_size
+            new_height = int(max_size * height / width)
+        else:
+            new_height = max_size
+            new_width = int(max_size * width / height)
+
+        resized_image = input_image.resize((new_width, new_height), Image.LANCZOS)
+        return resized_image
+    return input_image
+
+
 def format_image(
         image_path: str,
         cache_dir: str = CACHE_DIR,
+        resize: bool = True,
 ) -> Image.Image | str | None:
     if image_path.startswith("http://") or image_path.startswith("https://"):
         image_obj = Image.open(requests.get(image_path, stream=True).raw)
@@ -109,6 +128,20 @@ def format_image(
         raise ValueError(
             f"Unrecognized image input, support local path, http url, base64 and PIL.Image, got {image_path}")
 
+    image_name_arr = os.path.basename(image_path).split(".")
+    image_name = image_name_arr[0]
+    image_ext = image_name_arr[1]
+
+    # 把 png 转成 jpg 提升识别效果
+    if "png" == image_ext:
+        rgb_img = image_obj.convert("RGB")
+        image_path = f"{CACHE_DIR}/{image_name}.jpg"
+        rgb_img.save(image_path)
+        image_ext = "jpg"
+        image_obj = Image.open(f"{CACHE_DIR}/{image_name}.jpg")
+
+    if resize:
+        image_obj = resize_image(image_obj)
 
     exif = image_obj.getexif()
     # 274 is the code for image rotation and 1 means "correct orientation"
@@ -119,9 +152,6 @@ def format_image(
             warnings.warn(
                 f"Failed to transpose image {image_path} based on EXIF data."
             )
-    image_name_arr = os.path.basename(image_path).split(".")
-    image_name = image_name_arr[0]
-    image_ext = image_name_arr[1]
 
     if image_ext in ["jpg", "jpeg"]:
         image_ext = "jpeg"
@@ -143,5 +173,3 @@ def format_image(
 def convert_image_to_base64(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
-
-
