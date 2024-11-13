@@ -1,0 +1,24 @@
+name: vllm_test
+
+services:
+  vllm:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+              driver: nvidia
+              count: all
+    image: vllm/vllm-openai:v0.6.3
+    ipc: host
+    volumes:
+      - /storage-800GB/models:/storage-800GB/models
+    entrypoint: python3
+    command: -m vllm.entrypoints.openai.api_server --port=5000 --host=0.0.0.0 ${VLLM_ARGS}
+    ports:
+        - 5000:5000
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://0.0.0.0:5000/v1/models" ]
+      interval: 30s
+      timeout: 5s
+      retries: 20

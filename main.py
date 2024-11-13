@@ -8,8 +8,7 @@ from image_utils import format_image, convert_image_to_base64
 OPENAI_VISION_MODEL = 'Qwen2-VL-7B-Instruct'
 
 openai_vision_client = OpenAI(
-    # base_url="http://xinference_host:9997/v1",
-    base_url="http://10.22.11.181:6000/v1",
+    base_url="http://xinference_host:9997/v1",
     api_key="xxx",
 )
 

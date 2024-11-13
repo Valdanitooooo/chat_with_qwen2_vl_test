@@ -15,10 +15,14 @@ So I copied the [code for processing images in Gradio](https://github.com/gradio
 pip install -r requirements.txt
 ```
 
-### 1. Deploying the qwen2-vl model using xinference
+### 1. Deploying the qwen2-vl model using vllm or xinference
 
-Then modify the API configuration in main.py
+If you are a beginner, you can refer to my deployment script in the `deploy` directory
 
+1. Be sure to modify the volumes configuration in `deploy/docker-compose.yml` in order to find the correct model weight directory on your hard drive
+2. Modify the parameters in `deploy/.env` to what you need
+3. Run `docker compose up -d` in the `deploy` directory to start the vllm service
+4. Then modify the API configuration in main.py
 ```
 OPENAI_VISION_MODEL = 'Qwen2-VL-7B-Instruct'
 
