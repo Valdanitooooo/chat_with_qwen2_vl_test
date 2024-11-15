@@ -93,9 +93,9 @@ def save_pil_to_cache(
 # 仅对部分图片有效，对那种图片很大，但是要识别的内容在图片中占比很小的情况会起负面效果
 def resize_image(input_image):
     width, height = input_image.size
-    max_size = 500
+    max_size = 499
 
-    if width > max_size or height > max_size:
+    if width > max_size and height > max_size:
         if width > height:
             new_width = max_size
             new_height = int(max_size * height / width)
